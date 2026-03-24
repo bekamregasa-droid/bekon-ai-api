@@ -6,8 +6,10 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyDqSJrWmj9RmEMMKoIP1CiL9ROY6PWreI0')
+# Your Gemini API Key
+GEMINI_API_KEY = "AIzaSyDqSJrWmj9RmEMMKoIP1CiL9ROY6PWreI0"
 
+# Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-pro')
 
@@ -15,19 +17,20 @@ model = genai.GenerativeModel('gemini-pro')
 def home():
     return jsonify({'message': 'BEKON AI API is running!', 'status': 'online'})
 
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({'status': 'healthy'})
-
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data'}), 400
+        
         message = data.get('message', '')
         if not message:
-            return jsonify({'error': 'No message provided'}), 400
+            return jsonify({'error': 'No message'}), 400
+        
         response = model.generate_content(message)
         return jsonify({'response': response.text})
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -35,13 +38,27 @@ def chat():
 def analyze():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data'}), 400
+        
         answers = data.get('answers', [])
         if not answers:
-            return jsonify({'error': 'No answers provided'}), 400
-        prompt = f"Analyze these childhood experiences: {answers}"
+            return jsonify({'error': 'No answers'}), 400
+        
+        # Combine answers into one text
+        combined = ' '.join(answers)
+        
+        prompt = f"""You are a career counselor for Ethiopian students. Analyze these childhood experiences and suggest career paths:
+
+{combined}
+
+Give 3 department recommendations with Ethiopian universities."""
+        
         response = model.generate_content(prompt)
         return jsonify({'response': response.text})
+        
     except Exception as e:
+        print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
