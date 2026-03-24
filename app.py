@@ -11,7 +11,9 @@ GEMINI_API_KEY = "AIzaSyDqSJrWmj9RmEMMKoIP1CiL9ROY6PWreI0"
 
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+
+# Use the correct model name
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 @app.route('/', methods=['GET'])
 def home():
@@ -45,7 +47,6 @@ def analyze():
         if not answers:
             return jsonify({'error': 'No answers'}), 400
         
-        # Combine answers into one text
         combined = ' '.join(answers)
         
         prompt = f"""You are a career counselor for Ethiopian students. Analyze these childhood experiences and suggest career paths:
