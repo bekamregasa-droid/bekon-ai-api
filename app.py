@@ -6,8 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Your Gemini API Key
-GEMINI_API_KEY = "AIzaSyDqSJrWmj9RmEMMKoIP1CiL9ROY6PWreI0"
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyDqSJrWmj9RmEMMKoIP1CiL9ROY6PWreI0')
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-pro')
@@ -16,18 +15,19 @@ model = genai.GenerativeModel('gemini-pro')
 def home():
     return jsonify({'message': 'BEKON AI API is running!', 'status': 'online'})
 
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'healthy'})
+
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
         data = request.get_json()
         message = data.get('message', '')
-        
         if not message:
             return jsonify({'error': 'No message provided'}), 400
-        
         response = model.generate_content(message)
         return jsonify({'response': response.text})
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -36,28 +36,14 @@ def analyze():
     try:
         data = request.get_json()
         answers = data.get('answers', [])
-        
         if not answers:
             return jsonify({'error': 'No answers provided'}), 400
-        
-        prompt = f"""You are a career counselor for Ethiopian students. Analyze these childhood experiences:
-
-{chr(10).join(answers)}
-
-Provide:
-1. Top 3 recommended departments at Ethiopian universities
-2. Why each matches
-3. Specific careers in each field
-4. Ethiopian universities offering these programs
-5. Encouraging next steps
-
-Be detailed and specific to Ethiopia."""
-        
+        prompt = f"Analyze these childhood experiences: {answers}"
         response = model.generate_content(prompt)
         return jsonify({'response': response.text})
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
