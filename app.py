@@ -11,13 +11,15 @@ GEMINI_API_KEY = "AIzaSyDqSJrWmj9RmEMMKoIP1CiL9ROY6PWreI0"
 
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-
-# Use the correct model name
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({'message': 'BEKON AI API is running!', 'status': 'online'})
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'healthy'})
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -34,6 +36,7 @@ def chat():
         return jsonify({'response': response.text})
         
     except Exception as e:
+        print(f"Chat error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/analyze', methods=['POST'])
@@ -59,7 +62,7 @@ Give 3 department recommendations with Ethiopian universities."""
         return jsonify({'response': response.text})
         
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Analyze error: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
