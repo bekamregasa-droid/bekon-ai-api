@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: bekon-ai-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GEMINI_API_KEY
+        value: AIzaSyDqSJrWmj9RmEMMKoIP1CiL9ROY6PWreI0
